@@ -9,11 +9,12 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationChain
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import Ollama
-from tts import TextToSpeechService
+# from tts import TextToSpeechService
+import subprocess
 
 console = Console()
 stt = whisper.load_model("base.en")
-tts = TextToSpeechService()
+# tts = TextToSpeechService()
 
 template = """
 You are a helpful and friendly AI assistant. You are polite, respectful, and aim to provide concise responses of less 
@@ -31,7 +32,7 @@ chain = ConversationChain(
     prompt=PROMPT,
     verbose=False,
     memory=ConversationBufferMemory(ai_prefix="Assistant:"),
-    llm=Ollama(),
+    llm=Ollama(model="llama3.2"),
 )
 
 
@@ -134,13 +135,14 @@ if __name__ == "__main__":
                 with console.status("Transcribing...", spinner="earth"):
                     text = transcribe(audio_np)
                 console.print(f"[yellow]You: {text}")
-
+                response = None
                 with console.status("Generating response...", spinner="earth"):
                     response = get_llm_response(text)
-                    sample_rate, audio_array = tts.long_form_synthesize(response)
-
+                    # sample_rate, audio_array = tts.long_form_synthesize(response)
                 console.print(f"[cyan]Assistant: {response}")
-                play_audio(sample_rate, audio_array)
+                subprocess.call(["say",str(response)]) # using original Mac tts
+                sd.wait()
+                # play_audio(sample_rate, audio_array)
             else:
                 console.print(
                     "[red]No audio recorded. Please ensure your microphone is working."

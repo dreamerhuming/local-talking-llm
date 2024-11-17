@@ -20,8 +20,15 @@ class TextToSpeechService:
             Defaults to "cuda" if available, otherwise "cpu".
         """
         self.device = device
+        # self.device = "mps"
         self.processor = AutoProcessor.from_pretrained("suno/bark-small")
         self.model = BarkModel.from_pretrained("suno/bark-small")
+        self.processor.save_pretrained("./models/suno_bark_small_processor")
+        self.model.save_pretrained("./models/suno_bark_small_model")
+
+        # firstly using vpn to save the model files due to the network problem, then load model files from local disk
+        # self.processor = AutoProcessor.from_pretrained("./models/suno_bark_small_processor")
+        # self.model = BarkModel.from_pretrained("./models/suno_bark_small_model")
         self.model.to(self.device)
 
     def synthesize(self, text: str, voice_preset: str = "v2/en_speaker_1"):
